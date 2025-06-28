@@ -31,7 +31,7 @@ setupSwagger(app);
 app.use('/auth', authRoutes);
 app.use('/api', taskRoutes);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
 sequelize.sync({ force: false }).then(() => {
   console.log('Conectado a la base de datos');
