@@ -1,0 +1,8 @@
+{
+  "build": {
+    "builder": "nodejs",
+    "buildCommand": "npm install && npx tsc",
+    "startCommand": "node dist/index.js"
+  },
+  "rootDirectory": "backend"
+}
