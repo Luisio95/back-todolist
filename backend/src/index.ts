@@ -9,34 +9,50 @@ import { setupSwagger } from './utils/swagger';
 dotenv.config();
 const app = express();
 
-// Configuración básica primero
+// Middlewares básicos
 app.use(express.json());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}));
 
-// CORS para todas las rutas EXCEPTO /api-docs
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api-docs')) {
-    return next();
-  }
-  cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-  })(req, res, next);
-});
-
-// Swagger 
+// Swagger
 setupSwagger(app);
 
-// Rutas de la aplicación
+// Rutas
 app.use('/auth', authRoutes);
 app.use('/api', taskRoutes);
 
+// Health Check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Manejo de errores
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+});
+
 const PORT = process.env.PORT || 8080;
 
-sequelize.sync({ force: false }).then(() => {
-  console.log('Conectado a la base de datos');
-  app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-    console.log(`Swagger UI disponible en http://localhost:${PORT}/api-docs`);
-  });
-}).catch(error => console.log('Error al conectar a la base de datos:', error));
+// Inicialización segura
+async function startServer() {
+  try {
+    await sequelize.authenticate();
+    console.log('Conexión a BD exitosa');
+    
+    await sequelize.sync({ alter: true }); // O { force: false } en producción
+    console.log('Modelos sincronizados');
+
+    app.listen(PORT, () => {
+      console.log(`Servidor en puerto ${PORT}`);
+      console.log(`Swagger: http://localhost:${PORT}/api-docs`);
+    });
+  } catch (error) {
+    console.error('Error de inicio:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
