@@ -1,8 +1,1 @@
-{
-  "build": {
-    "builder": "nodejs",
-    "buildCommand": "npm install && npx tsc",
-    "startCommand": "npm run start"
-  },
-  "rootDirectory": "backend"
-}
+
